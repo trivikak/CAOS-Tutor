@@ -1,0 +1,12 @@
+Course-Specific Questions
+
+1. Is there a significant difference in how students perform in labs, homework, quizzes, and exams? If so, what do you attribute that difference to?
+
+2. Do students struggle more with computer architecture topics or operating systems topics?
+
+3. What background do you expect students to have, and what might be helpful to review before starting the class?
+
+4. Do you think an AI tutor would help boost pop quiz performance? How could the tutor best help?
+
+5. Where do you think students currently use AI in CAOS, and do you feel that their usage is effective?
+
