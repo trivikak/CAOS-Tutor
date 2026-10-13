@@ -10,3 +10,10 @@ The goal of this site is to build upon the FOCS and Signals & Systems sites to c
 - Typescript
 - Vite
 
+## Run locally
+
+```sh
+npm install
+npm run dev
+```
+
