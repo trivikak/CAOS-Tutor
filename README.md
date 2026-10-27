@@ -13,7 +13,7 @@ The goal of this site is to build upon the FOCS and Signals & Systems sites to c
 ## Run locally
 
 ```sh
-npm install
+npm --prefix frontend install
 npm run dev
 ```
 
