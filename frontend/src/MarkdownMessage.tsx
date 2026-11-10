@@ -1,9 +1,9 @@
-import { useMemo, type ComponentProps } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import remarkMath from "remark-math";
-import rehypeKatex from "rehype-katex";
-import "katex/dist/katex.min.css";
+import { useMemo, type ComponentProps } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
 
 /** If the reply is wrapped in ``` / ```markdown fences, unwrap so it is not one big code block. */
 function unwrapMarkdownFences(text: string): string {
@@ -23,20 +23,20 @@ function normalizeMathDelimiters(text: string): string {
 
 /** Ensure a newline before ## / ### so headers parse correctly. */
 function ensureHeaderNewlines(text: string): string {
-  return text.replace(/([^\n])(#{1,6}\s)/g, "$1\n$2");
+  return text.replace(/([^\n])(#{1,6}\s)/g, '$1\n$2');
 }
 
 /** Split squashed GFM tables where `||` glued rows together. */
 function splitSquashedTableRows(text: string): string {
   return text
-    .split("\n")
+    .split('\n')
     .map((line) => {
-      if (line.includes("|") && line.includes("||")) {
-        return line.replace(/\|\|/g, "|\n|");
+      if (line.includes('|') && line.includes('||')) {
+        return line.replace(/\|\|/g, '|\n|');
       }
       return line;
     })
-    .join("\n");
+    .join('\n');
 }
 
 /**
@@ -48,7 +48,7 @@ function promoteOutlineLinesToList(text: string): string {
     if (!t) return false;
     return /^\d+(?:\.\d+)*\s+\S/.test(t);
   };
-  const lines = text.split("\n");
+  const lines = text.split('\n');
   const out: string[] = [];
   let i = 0;
   while (i < lines.length) {
@@ -58,13 +58,13 @@ function promoteOutlineLinesToList(text: string): string {
         block.push(`- ${lines[i].trim()}`);
         i++;
       }
-      out.push(block.join("\n"));
+      out.push(block.join('\n'));
     } else {
       out.push(lines[i]);
       i++;
     }
   }
-  return out.join("\n");
+  return out.join('\n');
 }
 
 function normalizeAiMarkdown(raw: string): string {
@@ -83,12 +83,8 @@ export interface MarkdownMessageProps {
 }
 
 /** Chat bubble: Markdown (GFM, headings, etc.) + KaTeX ($...$ / $$...$$). */
-export default function MarkdownMessage({
-  children,
-  className,
-  onPickLine,
-}: MarkdownMessageProps) {
-  const raw = typeof children === "string" ? children : String(children ?? "");
+export default function MarkdownMessage({ children, className, onPickLine }: MarkdownMessageProps) {
+  const raw = typeof children === 'string' ? children : String(children ?? '');
   const content = useMemo(() => {
     let s = normalizeAiMarkdown(raw);
     if (onPickLine) s = promoteOutlineLinesToList(s);
@@ -98,27 +94,23 @@ export default function MarkdownMessage({
   const components = useMemo(() => {
     if (!onPickLine) return undefined;
 
-    const Li = (props: ComponentProps<"li"> & { node?: unknown }) => {
+    const Li = (props: ComponentProps<'li'> & { node?: unknown }) => {
       const { children: liChildren, className: liClass, node: _node, ...rest } = props;
       return (
-        <li {...rest} className={["markdown-pickable-li", liClass].filter(Boolean).join(" ")}>
+        <li {...rest} className={['markdown-pickable-li', liClass].filter(Boolean).join(' ')}>
           <span
             className="markdown-pickable-hit"
             role="button"
             tabIndex={0}
             title="Click to insert into the question box"
             onClick={(e) => {
-              const t = (e.currentTarget as HTMLElement).textContent
-                ?.replace(/\s+/g, " ")
-                .trim();
+              const t = (e.currentTarget as HTMLElement).textContent?.replace(/\s+/g, ' ').trim();
               if (t) onPickLine(t);
             }}
             onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
+              if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
-                const t = (e.currentTarget as HTMLElement).textContent
-                  ?.replace(/\s+/g, " ")
-                  .trim();
+                const t = (e.currentTarget as HTMLElement).textContent?.replace(/\s+/g, ' ').trim();
                 if (t) onPickLine(t);
               }
             }}
@@ -133,11 +125,11 @@ export default function MarkdownMessage({
   }, [onPickLine]);
 
   const rootClass = [
-    className ?? "markdown-message",
-    onPickLine ? "markdown-message--pickable" : "",
+    className ?? 'markdown-message',
+    onPickLine ? 'markdown-message--pickable' : '',
   ]
     .filter(Boolean)
-    .join(" ");
+    .join(' ');
 
   return (
     <div className={rootClass}>
