@@ -17,3 +17,7 @@ npm --prefix frontend install
 npm run dev
 ```
 
+## Code formatting
+
+- From the repository root, run `npm --prefix frontend run format` to format the source and configuration files
+- Run `npm --prefix frontend run format:check` to check formatting without changing files
