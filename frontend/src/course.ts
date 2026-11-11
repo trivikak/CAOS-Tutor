@@ -1,7 +1,8 @@
-export type Lesson = {
+import { subtopics } from './subtopics';
+
+export type LessonContent = {
   id: string;
   title: string;
-  group: string;
   summary: string;
   notes: string;
   example: string;
@@ -11,7 +12,12 @@ export type Lesson = {
   explanation: string;
   hint: string;
 };
-export const lessons: Lesson[] = [
+export const courseGroups = ['Architecture', 'Programming', 'Operating systems'] as const;
+type CourseGroup = (typeof courseGroups)[number];
+
+export type Lesson = LessonContent & { group: CourseGroup; moduleId: string };
+
+const topicOverviews: (LessonContent & { group: CourseGroup })[] = [
   {
     id: 'numbers',
     title: 'Numeric representations',
@@ -188,7 +194,7 @@ export const lessons: Lesson[] = [
   {
     id: 'parallel',
     title: 'Parallel programming',
-    group: 'Programming',
+    group: 'Operating systems',
     summary: 'Threads, work partitioning, joins, and speedup limits.',
     notes:
       'Parallel programs divide work among execution contexts. Threads can reduce runtime if work is independent, but synchronization, memory bandwidth, and serial sections limit gains. Join worker threads before consuming their final results or releasing data they still use. Partition data to minimize contention and false sharing. Amdahl’s law bounds ideal speedup for a fixed workload: speedup = 1 / ((1 − p) + p / N), where p is the parallel fraction and N is the number of processors. Real overhead usually lowers speedup further.',
@@ -204,7 +210,7 @@ export const lessons: Lesson[] = [
   {
     id: 'network',
     title: 'Network programming',
-    group: 'Programming',
+    group: 'Operating systems',
     summary: 'Sockets, client/server flow, TCP streams, and message framing.',
     notes:
       'A socket is an endpoint for communication. A typical TCP server calls socket, bind, listen, and accept; a client calls socket and connect. accept produces a new connected socket while the listening socket remains available. TCP provides an ordered byte stream, not application message boundaries. Design framing using a fixed length, delimiter, or length prefix; loop to handle partial sends and receives. A receive of zero indicates an orderly peer shutdown. UDP sends datagrams and does not guarantee delivery or ordering.',
@@ -223,6 +229,25 @@ export const lessons: Lesson[] = [
     hint: 'A stream has no built-in application message boundaries.',
   },
 ];
+export const courseModules = courseGroups.flatMap((group) =>
+  topicOverviews
+    .filter((overview) => overview.group === group)
+    .map((overview) => ({
+      id: overview.id,
+      title: overview.title,
+      group,
+      lessons: [overview, ...subtopics[overview.id]].map(
+        (lesson): Lesson => ({
+          ...lesson,
+          group,
+          moduleId: overview.id,
+        }),
+      ),
+    })),
+);
+
+export const lessons = courseModules.flatMap((module) => module.lessons);
+
 export const projects = [
   {
     id: 'bits',

@@ -84,7 +84,7 @@ export default function Home() {
                   It reads, adds, then writes. Two threads can read the same value and lose an
                   update. Protect the critical section with a mutex.
                 </div>
-                <span className="hs-srctag">↳ Synchronization · topic 10</span>
+                <span className="hs-srctag">↳ Synchronization &amp; deadlock</span>
               </div>
               <div className="hs-card hs-formula">
                 <span className="hs-pin hs-pin--pen" />

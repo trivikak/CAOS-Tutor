@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, Route, Routes, useLocation, useSearchParams } from 'react-router-dom';
 import Home from './Home';
-import { lessons, projects, type Lesson } from './course';
+import { courseGroups, courseModules, lessons, projects, type Lesson } from './course';
 import { readProgress, storageKey, type Progress } from './storage';
 
 function download(name: string, text: string, type = 'text/plain') {
@@ -77,10 +77,21 @@ function Learning({ progress, update, practice = false }: Shared & { practice?: 
   const lesson = lessons.find((l) => l.id === params.get('topic')) || lessons[0];
   const [search, setSearch] = useState('');
   const tab = practice ? 'practice' : params.get('tab') || 'notes';
-  const filtered = lessons.filter((l) =>
-    (l.title + ' ' + l.summary + ' ' + l.group).toLowerCase().includes(search.toLowerCase()),
-  );
+  const query = search.trim().toLowerCase();
+  const activeModule = courseModules.find((module) => module.id === lesson.moduleId);
+  const matchingModules = courseModules
+    .map((module) => ({
+      ...module,
+      lessons: module.lessons.filter((item) =>
+        [item.title, item.summary, module.title, module.group]
+          .join(' ')
+          .toLowerCase()
+          .includes(query),
+      ),
+    }))
+    .filter((module) => module.lessons.length > 0);
   const index = lessons.indexOf(lesson);
+
   return (
     <div className="workspace">
       <aside className="outline">
@@ -95,32 +106,50 @@ function Learning({ progress, update, practice = false }: Shared & { practice?: 
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        {['Architecture', 'Programming', 'Operating systems'].map((group) => (
-          <div key={group}>
-            <h3>{group}</h3>
-            {filtered
-              .filter((l) => l.group === group)
-              .map((l) => (
-                <button
-                  className={'topic ' + (l.id === lesson.id ? 'active' : '')}
-                  key={l.id}
-                  onClick={() => setParams({ topic: l.id, ...(practice ? {} : { tab }) })}
+        {courseGroups.map((group) => {
+          const modules = matchingModules.filter((module) => module.group === group);
+          if (modules.length === 0) return null;
+
+          return (
+            <section key={group}>
+              <h3>{group}</h3>
+              {modules.map((module) => (
+                <details
+                  className="course-module"
+                  key={module.id}
+                  open={Boolean(query) || module.id === lesson.moduleId}
                 >
-                  <span>{String(lessons.indexOf(l) + 1).padStart(2, '0')}</span>
-                  {l.title}
-                  <span className="topic-check">
-                    {progress.solved.includes(l.id) ? '✓' : progress.read.includes(l.id) ? '◐' : ''}
-                  </span>
-                </button>
+                  <summary>{module.title}</summary>
+                  {module.lessons.map((item) => (
+                    <button
+                      className={item.id === lesson.id ? 'topic active' : 'topic'}
+                      aria-current={item.id === lesson.id ? 'page' : undefined}
+                      key={item.id}
+                      onClick={() => setParams({ topic: item.id, ...(practice ? {} : { tab }) })}
+                    >
+                      <span>{String(lessons.indexOf(item) + 1).padStart(2, '0')}</span>
+                      {item.id === module.id ? 'Overview' : item.title}
+                      <span className="topic-check">
+                        {progress.solved.includes(item.id)
+                          ? '✓'
+                          : progress.read.includes(item.id)
+                            ? '◐'
+                            : ''}
+                      </span>
+                    </button>
+                  ))}
+                </details>
               ))}
-          </div>
-        ))}
-        {!filtered.length && <p>No topics match. Try “memory” or “C”.</p>}
+            </section>
+          );
+        })}
+        {!matchingModules.length && <p>No lessons match. Try “memory” or “C”.</p>}
       </aside>
       <div className="lesson-area">
         <div className="lesson-heading">
           <span className="eyebrow">
-            {lesson.group} / TOPIC {String(index + 1).padStart(2, '0')}
+            {lesson.group} / {activeModule?.title} /{' '}
+            {lesson.id === lesson.moduleId ? 'Overview' : 'Lesson ' + (index + 1)}
           </span>
           <h1>{lesson.title}</h1>
           <p>{lesson.summary}</p>
@@ -193,13 +222,13 @@ function Learning({ progress, update, practice = false }: Shared & { practice?: 
                 disabled={index === 0}
                 onClick={() => setParams({ topic: lessons[index - 1].id })}
               >
-                ← Previous topic
+                ← Previous lesson
               </button>
               <button
                 disabled={index === lessons.length - 1}
                 onClick={() => setParams({ topic: lessons[index + 1].id })}
               >
-                Next topic →
+                Next lesson →
               </button>
             </div>
           </div>
@@ -273,8 +302,8 @@ function Dashboard({ progress }: Shared) {
       </p>
       <div className="stats">
         {[
-          [progress.read.length, 'of 12 topics read'],
-          [progress.solved.length, 'of 12 checks solved'],
+          [progress.read.length, `of ${lessons.length} lessons read`],
+          [progress.solved.length, `of ${lessons.length} checks solved`],
           [progress.tasks.length, 'of 16 project steps'],
         ].map(([n, l]) => (
           <div className="paper" key={l}>
@@ -299,7 +328,7 @@ function Dashboard({ progress }: Shared) {
             <span className="number">{String(i + 1).padStart(2, '0')}</span>
             <div>
               <strong>{l.title}</strong>
-              <small>{l.group}</small>
+              <small>{courseModules.find((module) => module.id === l.moduleId)?.title}</small>
             </div>
             <span>{progress.read.includes(l.id) ? 'Read ✓' : 'Not read'}</span>
             <span className={progress.solved.includes(l.id) ? 'status' : ''}>
