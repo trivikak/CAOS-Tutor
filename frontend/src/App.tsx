@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, Route, Routes, useLocation, useSearchParams } from 'react-router-dom';
 import Home from './Home';
+import LessonBody from './LessonBody';
 import { courseGroups, courseModules, lessons, projects, type Lesson } from './course';
 import { readProgress, storageKey, type Progress } from './storage';
 
@@ -191,11 +192,8 @@ function Learning({ progress, update, practice = false }: Shared & { practice?: 
               </section>
             ) : (
               <section className="paper">
-                <span className="eyebrow">THE BIG IDEA</span>
-                <h2>Connect the concepts.</h2>
-                <p className="lesson-text">{lesson.notes}</p>
-                <h3>A worked example</h3>
-                <pre>{lesson.example}</pre>
+                <h2>Lesson notes</h2>
+                <LessonBody lesson={lesson} />
                 <button
                   className={progress.read.includes(lesson.id) ? 'completed' : 'primary'}
                   onClick={() =>

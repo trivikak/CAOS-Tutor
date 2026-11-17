@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import './Home.css';
-import { lessons } from './course';
 export default function Home() {
   return (
     <div className="home-scrap">
